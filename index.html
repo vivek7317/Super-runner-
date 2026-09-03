@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Runner V3</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#111;color:#fff;font-family:Arial;text-align:center}
+h1{margin:12px}#game{display:block;width:100%;max-width:600px;height:400px;margin:auto;border:3px solid #fff}
+.controls{max-width:600px;margin:auto;padding:10px;display:flex;gap:8px;background:#222}
+button{flex:1;padding:15px;border:0;border-radius:10px;font-size:18px;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>🏃 SUPER RUNNER V3</h1>
+<canvas id="game" width="600" height="400"></canvas>
+<div class="controls"><button onclick="jump()">⬆️ JUMP</button><button onclick="restart()">🔄 RESTART</button></div>
+<script>
+const c=document.getElementById("game"),x=c.getContext("2d");
+let p,o,coins,score,speed,over,t1,t2;
+function restart(){p={x:70,y:290,w:35,h:50,vy:0,ground:true};o=[];coins=[];score=0;speed=5;over=false;t1=t2=0}
+function jump(){if(over){restart();return}if(p.ground){p.vy=-13;p.ground=false}}
+function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function draw(){
+x.clearRect(0,0,600,400);x.fillStyle="#5ec9ff";x.fillRect(0,0,600,280);
+x.fillStyle="#ffd54f";x.beginPath();x.arc(520,70,35,0,7);x.fill();
+x.fillStyle="#176b2c";for(let q=150;q<700;q+=230){x.beginPath();x.moveTo(q,280);x.lineTo(q+45,190);x.lineTo(q+90,280);x.fill()}
+x.fillStyle="#2e7d32";x.fillRect(0,280,600,120);x.fillStyle="#222";x.fillRect(0,330,600,70);
+x.fillStyle="#ddd";for(let q=10;q<600;q+=80)x.fillRect(q,360,45,7);
+x.fillStyle="#1976d2";x.fillRect(p.x,p.y+15,p.w,35);x.fillStyle="#8d5524";x.fillRect(p.x+7,p.y,22,22);
+x.fillStyle="#111";x.fillRect(p.x+6,p.y,24,7);x.fillStyle="#222";x.fillRect(p.x+5,p.y+47,8,10);x.fillRect(p.x+23,p.y+47,8,10);
+x.fillStyle="#333";o.forEach(a=>x.fillRect(a.x,a.y,a.w,a.h));
+coins.forEach(a=>{x.fillStyle="#ffd700";x.beginPath();x.arc(a.x,a.y,10,0,7);x.fill()});
+x.fillStyle="#fff";x.font="bold 22px Arial";x.fillText("🏆 Score: "+Math.floor(score),15,30);
+if(over){x.fillStyle="rgba(0,0,0,.7)";x.fillRect(0,0,600,400);x.fillStyle="#fff";x.textAlign="center";x.font="bold 45px Arial";x.fillText("GAME OVER",300,170);x.font="24px Arial";x.fillText("Score: "+Math.floor(score),300,215);x.fillText("⬇️ RESTART दबाएँ",300,260);x.textAlign="left"}
+}
+function loop(){if(!over){p.vy+=.7;p.y+=p.vy;if(p.y>=290){p.y=290;p.vy=0;p.ground=true}
+t1++;if(t1>70){t1=0;let h=30+Math.random()*45;o.push({x:600,y:330-h,w:25+Math.random()*20,h:h})}
+t2++;if(t2>90){t2=0;coins.push({x:600,y:180+Math.random()*100})}
+o.forEach(a=>a.x-=speed);coins.forEach(a=>a.x-=speed);o=o.filter(a=>a.x>-60);coins=coins.filter(a=>a.x>-30);
+for(const a of o)if(hit(p,a))over=true;
+coins=coins.filter(a=>{if(Math.hypot(p.x+18-a.x,p.y+25-a.y)<30){score+=10;return false}return true});
+score+=.08;speed+=.002}draw();requestAnimationFrame(loop)}
+document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp")jump()});
+c.addEventListener("touchstart",e=>{e.preventDefault();jump()});restart();loop();
+</script>
+</body>
+</html>
